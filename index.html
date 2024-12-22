@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Santa 🎅</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* Base Styles */
+        :root {
+            --primary: #ff4757;
+            --secondary: #2f3542;
+            --accent: #ff6b81;
+            --background: #1a1f2c;
+            --snow: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--background);
+            color: var(--secondary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            perspective: 1000px;
+        }
+
+        /* Container Styles */
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2),
+                        0 0 100px rgba(255, 71, 87, 0.2);
+            position: relative;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-10px) rotateX(5deg);
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 30px;
+            font-size: 28px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) }
+            100% { transform: translateX(100%) }
+        }
+
+        /* Button Styles */
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4);
+        }
+
+        /* Info Card Styles */
+        .info {
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 15px;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transform-style: preserve-3d;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .info:hover {
+            transform: scale(1.02) translateX(10px) rotateX(2deg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* Input Styles */
+        input[type="email"],
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            font-size: 16px;
+            background: rgba(255,255,255,0.9);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        input[type="email"]:focus,
+        input[type="text"]:focus {
+            transform: scale(1.02);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 107, 129, 0.2);
+            outline: none;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 31, 44, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-spinner {
+            width: 100px;
+            height: 100px;
+            border: 8px solid #fff;
+            border-top: 8px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Santa Avatar */
+        .santa-avatar {
+            width: 100px;
+            height: 100px;
+            background: #fff;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transform-style: preserve-3d;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .santa-avatar::after {
+            content: '🎅';
+            font-size: 60px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        /* Error Message */
+        .error-message {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Canvas Container */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--snow);
+            font-size: 14px;
+            margin-top: 40px;
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div class="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Welcome Page -->
+    <div id="welcome" class="container animate__animated animate__fadeIn">
+        <div class="header">
+            Campagne Secret Santa
+            <div class="santa-avatar"></div>
+        </div>
+        <p style="font-size: 20px; text-align: center; line-height: 1.6;">
+            Bienvenue dans la magie de Noël ! 🎄<br>
+            Prêt à découvrir qui sera votre Secret Santa cette année ?
+        </p>
+        <div style="text-align: center;">
+            <button class="btn animate__animated animate__pulse animate__infinite" onclick="navigateToLogin()">
+                Commencer l'aventure ✨
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login" class="container animate__animated animate__fadeIn" style="display:none;">
+        <div class="header">
+            Secret Santa - Connexion
+            <div class="santa-avatar"></div>
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="email" id="email" name="email" placeholder="Votre email magique ✉️" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="secret" name="secret" placeholder="Votre code secret 🔑" required>
+            </div>
+            <div style="text-align: center;">
+                <button type="submit" class="btn">Découvrir mon Secret Santa 🎁</button>
+            </div>
+        </form>
+        <div id="errorMessage" class="error-message">
+            <strong>Oops!</strong> Email ou code secret incorrect. Essayez encore! 🎅
+        </div>
+    </div>
+
+    <!-- Result Page -->
+    <div id="result" class="container animate__animated animate__fadeIn" style="display:none;">
+        <div class="header">
+            Votre Mission Secret Santa
+            <div class="santa-avatar"></div>
+        </div>
+        <h2 class="animate__animated animate__bounceIn">
+            Ho ho ho, <span id="userName"></span> ! 🎅
+        </h2>
+        <p style="font-size: 20px; text-align: center;">
+            Voici les indices pour gâter votre Secret Santa :
+        </p>
+
+        <div class="info animate__animated animate__fadeInLeft">
+            <strong>🎯 Nom : </strong><span id="recipientName"></span>
+        </div>
+        <div class="info animate__animated animate__fadeInLeft" style="animation-delay: 0.2s;">
+            <strong>⭐ Passions : </strong><span id="recipientHobbies"></span>
+        </div>
+        <div class="info animate__animated animate__fadeInLeft" style="animation-delay: 0.4s;">
+            <strong>🎁 Préférences : </strong><span id="recipientPreferences"></span>
+        </div>
+        <div class="info animate__animated animate__fadeInLeft" style="animation-delay: 0.6s;">
+            <strong>📖 Anecdote : </strong><span id="recipientAnecdote"></span>
+        </div>
+        <div class="info animate__animated animate__fadeInLeft" style="animation-delay: 0.8s;">
+            <strong>💌 Message : </strong><span id="recipientMessage"></span>
+        </div>
+
+        <p style="font-size: 20px; text-align: center; margin-top: 30px;">
+            Que la magie de Noël vous inspire ! 🎄✨
+        </p>
+    </div>
+
+    <div class="footer">
+        &copy; 2024 Secret Santa | Répandez la magie de Noël ! 🎁
+    </div>
+
+    <script>
+
+        let scene, camera, renderer, stars = [];
+
+        const IpAddress = "127.0.0.1";
+        const Port = "8000";
+
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            const container = document.getElementById('canvas-container');
+            if (container) {
+                container.appendChild(renderer.domElement);
+                createStars();
+                camera.position.z = 5;
+                animate();
+            } else {
+                console.error('Canvas container not found');
+            }
+        }
+
+        function createStars() {
+            const starGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const starMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+
+            for(let i = 0; i < 200; i++) {
+                const star = new THREE.Mesh(starGeometry, starMaterial);
+                star.position.set(
+                    Math.random() * 100 - 50,
+                    Math.random() * 100 - 50,
+                    Math.random() * 100 - 50
+                );
+                stars.push(star);
+                scene.add(star);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            stars.forEach(star => {
+                star.rotation.x += 0.01;
+                star.rotation.y += 0.01;
+            });
+            renderer.render(scene, camera);
+        }
+
+        const UI = {
+            showLoading() {
+                const loader = document.querySelector('.loading');
+                if (loader) loader.style.display = 'flex';
+            },
+
+            hideLoading() {
+                const loader = document.querySelector('.loading');
+                if (loader) loader.style.display = 'none';
+            },
+
+            showError(message) {
+                const errorElement = document.getElementById("errorMessage");
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = "block";
+                    errorElement.classList.add('animate__animated', 'animate__shakeX');
+                    setTimeout(() => {
+                        errorElement.classList.remove('animate__animated', 'animate__shakeX');
+                    }, 1000);
+                }
+            }
+        };
+
+        function navigateToLogin() {
+            UI.showLoading();
+            setTimeout(() => {
+                const welcome = document.getElementById("welcome");
+                const login = document.getElementById("login");
+                if (welcome) welcome.style.display = "none";
+                if (login) login.style.display = "block";
+                UI.hideLoading();
+            }, 1000);
+        }
+
+        function navigateToResult() {
+            console.log("Navigating to result page");
+            const login = document.getElementById("login");
+            const result = document.getElementById("result");
+            if (login) login.style.display = "none";
+            if (result) result.style.display = "block";
+            loadUserData();
+        }
+
+        function checkLocalStorage() {
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                return true;
+            } catch(e) {
+                console.error('localStorage is not available:', e);
+                return false;
+            }
+        }
+
+        async function handleLogin(email, secret) {
+            try {
+                const response = await fetch(`http://${IpAddress}:${Port}/login`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({ email, secret })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Login failed');
+                }
+
+                console.log("Response data:", data);
+                
+                if (data && data.message && data.recipient) {
+                    localStorage.setItem('userData', JSON.stringify(data));
+                    navigateToResult();
+                } else {
+                    throw new Error('Invalid response data structure');
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                UI.showError(error.message);
+            } finally {
+                UI.hideLoading();
+            }
+        }
+
+        function loadUserData() {
+            try {
+                const storedData = localStorage.getItem('userData');
+                console.log("Stored data:", storedData);
+                
+                if (!storedData) {
+                    throw new Error('No user data found');
+                }
+                
+                const userData = JSON.parse(storedData);
+                if (!userData?.message || !userData?.recipient) {
+                    throw new Error('Invalid user data structure');
+                }
+
+                const username = userData.message.split('Bonjour ')[1].split(',')[0];
+                const userNameElement = document.getElementById("userName");
+                if (userNameElement) userNameElement.textContent = username;
+
+                const elements = [
+                    { id: 'recipientName', value: userData.recipient.Nom },
+                    { id: 'recipientHobbies', value: userData.recipient.Passions },
+                    { id: 'recipientPreferences', value: userData.recipient.Preferences },
+                    { id: 'recipientAnecdote', value: userData.recipient.Anecdote },
+                    { id: 'recipientMessage', value: userData.recipient.Message }
+                ];
+
+                elements.forEach((element, index) => {
+                    setTimeout(() => {
+                        const el = document.getElementById(element.id);
+                        if (el) {
+                            el.style.opacity = '0';
+                            el.textContent = element.value || 'Non spécifié';
+                            fadeIn(el, 500);
+                        } else {
+                            console.error(`Element with id ${element.id} not found`);
+                        }
+                    }, index * 300);
+                });
+            } catch (error) {
+                console.error('Error in loadUserData:', error);
+                window.location.href = '/';
+            }
+        }
+
+        function fadeIn(element, duration) {
+            let opacity = 0;
+            const interval = 50;
+            const gap = interval / duration;
+
+            function tick() {
+                opacity = Math.min(opacity + gap, 1);
+                element.style.opacity = opacity;
+                if (opacity < 1) {
+                    requestAnimationFrame(tick);
+                }
+            }
+            tick();
+        }
+
+        // Event Listeners
+        window.addEventListener('load', () => {
+            if (!checkLocalStorage()) {
+                alert('Local storage is not available. Please enable cookies and reload the page.');
+            }
+            initThreeJS();
+            createSnowflakes();
+        });
+
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            if (camera && renderer) {
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById("loginForm");
+            if (loginForm) {
+                loginForm.addEventListener("submit", (event) => {
+                    event.preventDefault();
+                    UI.showLoading();
+                    
+                    const email = document.getElementById("email")?.value;
+                    const secret = document.getElementById("secret")?.value;
+                    
+                    if (email && secret) {
+                        handleLogin(email, secret);
+                    } else {
+                        UI.showError("Please fill in all fields");
+                        UI.hideLoading();
+                    }
+                });
+            }
+
+            document.addEventListener('mousemove', (e) => {
+                const cards = document.querySelectorAll('.info');
+                const mouseX = e.clientX / window.innerWidth - 0.5;
+                const mouseY = e.clientY / window.innerHeight - 0.5;
+
+                cards.forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const cardX = rect.left + rect.width / 2;
+                    const cardY = rect.top + rect.height / 2;
+
+                    const angle = Math.atan2(e.clientY - cardY, e.clientX - cardX);
+                    const distance = Math.min(
+                        Math.hypot(e.clientX - cardX, e.clientY - cardY) / 1000,
+                        0.5
+                    );
+
+                    card.style.transform = `
+                        perspective(1000px)
+                        rotateY(${mouseX * 10}deg)
+                        rotateX(${-mouseY * 10}deg)
+                        translateZ(${distance * 50}px)
+                    `;
+                });
+            });
+        });
+
+        function createSnowflakes() {
+            const snowflakesCount = 50;
+            const container = document.body;
+            
+            for (let i = 0; i < snowflakesCount; i++) {
+                createSnowflake(container);
+            }
+        }
+
+        function createSnowflake(container) {
+            const snowflake = document.createElement('div');
+            snowflake.innerHTML = '❄';
+            snowflake.className = 'snowflake';
+            snowflake.style.cssText = `
+                position: fixed;
+                color: white;
+                opacity: ${Math.random()};
+                font-size: ${Math.random() * 20 + 10}px;
+                left: ${Math.random() * 100}vw;
+                animation: fall ${Math.random() * 5 + 3}s linear infinite;
+                z-index: 1;
+            `;
+
+            container.appendChild(snowflake);
+
+            setTimeout(() => {
+                snowflake.remove();
+                createSnowflake(container);
+            }, (Math.random() * 5 + 3) * 1000);
+        }
+    </script>
+</body>
+</html>
