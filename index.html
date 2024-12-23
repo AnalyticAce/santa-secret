@@ -6,14 +6,15 @@
     <title>Secret Santa 🎅</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.0/gsap.min.js"></script>
     <style>
-        /* Base Styles */
         :root {
             --primary: #ff4757;
             --secondary: #2f3542;
             --accent: #ff6b81;
             --background: #1a1f2c;
             --snow: #ffffff;
+            --success: #2ecc71;
         }
 
         * {
@@ -37,32 +38,51 @@
             perspective: 1000px;
         }
 
-        /* Container Styles */
         .container {
             max-width: 800px;
             width: 100%;
             background: rgba(255, 255, 255, 0.95);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2),
-                        0 0 100px rgba(255, 71, 87, 0.2);
             position: relative;
             z-index: 2;
-            backdrop-filter: blur(10px);
             transform-style: preserve-3d;
-            transition: transform 0.5s ease;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.2),
+                0 0 100px rgba(255, 71, 87, 0.2);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                var(--primary), 
+                var(--accent), 
+                var(--success), 
+                var(--primary));
+            z-index: -1;
+            border-radius: 22px;
+            background-size: 400%;
+            animation: borderGlow 12s linear infinite;
+            filter: blur(10px);
+            opacity: 0.7;
         }
 
         .container:hover {
-            transform: translateY(-10px) rotateX(5deg);
+            transform: translateY(-10px) scale(1.02);
         }
 
-        /* Header Styles */
         .header {
             background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
             padding: 30px;
-            font-size: 28px;
             border-radius: 15px;
             margin-bottom: 30px;
             text-align: center;
@@ -76,110 +96,18 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
+            width: 200%;
             height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
-            animation: shine 2s infinite;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            );
+            animation: shimmer 3s infinite linear;
+            transform: skewX(-45deg);
         }
 
-        @keyframes shine {
-            0% { transform: translateX(-100%) }
-            100% { transform: translateX(100%) }
-        }
-
-        /* Button Styles */
-        .btn {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white;
-            padding: 15px 35px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
-            position: relative;
-            overflow: hidden;
-            transform-style: preserve-3d;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4);
-        }
-
-        /* Info Card Styles */
-        .info {
-            background: rgba(255,255,255,0.9);
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 15px;
-            border-left: 5px solid var(--accent);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transform-style: preserve-3d;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .info:hover {
-            transform: scale(1.02) translateX(10px) rotateX(2deg);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        /* Input Styles */
-        input[type="email"],
-        input[type="text"] {
-            width: 100%;
-            padding: 15px 20px;
-            margin: 15px 0;
-            border-radius: 10px;
-            border: 2px solid transparent;
-            font-size: 16px;
-            background: rgba(255,255,255,0.9);
-            transition: all 0.3s ease;
-            transform-style: preserve-3d;
-        }
-
-        input[type="email"]:focus,
-        input[type="text"]:focus {
-            transform: scale(1.02);
-            border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(255, 107, 129, 0.2);
-            outline: none;
-        }
-
-        /* Loading Animation */
-        .loading {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(26, 31, 44, 0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .loading-spinner {
-            width: 100px;
-            height: 100px;
-            border: 8px solid #fff;
-            border-top: 8px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Santa Avatar */
         .santa-avatar {
             width: 100px;
             height: 100px;
@@ -202,12 +130,100 @@
             transform: translate(-50%, -50%);
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0); }
-            50% { transform: translateY(-10px) rotate(5deg); }
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--success));
+            color: white;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            background-size: 200% 200%;
+            animation: gradientShift 5s ease infinite;
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
         }
 
-        /* Error Message */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 60%);
+            transform: rotate(45deg);
+            transition: 0.5s;
+            opacity: 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 71, 87, 0.4);
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+
+        .info {
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .info::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 20%,
+                rgba(255, 255, 255, 0.1) 40%,
+                rgba(255, 255, 255, 0.3) 60%,
+                transparent 80%
+            );
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+
+        .info:hover::after {
+            transform: translateX(100%);
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 31, 44, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-spinner {
+            width: 100px;
+            height: 100px;
+            border: 8px solid #fff;
+            border-top: 8px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
         .error-message {
             background: linear-gradient(135deg, #ff4757, #ff6b81);
             color: white;
@@ -218,24 +234,49 @@
             animation: shake 0.5s ease-in-out;
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0;
+            border-radius: 50%;
+            background: var(--primary);
+            z-index: 1000;
         }
 
-        /* Canvas Container */
-        #canvas-container {
+        .snowflake {
+            color: white;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
+            top: -20px;
+            animation: snowfall linear infinite;
+            text-shadow: 0 0 5px rgba(255,255,255,0.8);
+            z-index: 1;
             pointer-events: none;
         }
 
-        /* Footer */
+        .gift-box {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 8px;
+            bottom: 20px;
+            right: 20px;
+            transform-style: preserve-3d;
+            transform: rotate(-15deg);
+            animation: giftFloat 3s ease-in-out infinite;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .gift-box::before {
+            content: '🎁';
+            position: absolute;
+            font-size: 40px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
         .footer {
             text-align: center;
             padding: 20px;
@@ -245,6 +286,93 @@
             width: 100%;
             background: rgba(255,255,255,0.1);
             border-radius: 15px;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes borderGlow {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(-20px) rotate(0deg);
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        @keyframes giftFloat {
+            0%, 100% { transform: rotate(-15deg) translateY(0); }
+            50% { transform: rotate(-15deg) translateY(-20px); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) skewX(-45deg); }
+            100% { transform: translateX(100%) skewX(-45deg); }
+        }
+
+        input[type="email"],
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            font-size: 16px;
+            background: rgba(255,255,255,0.9);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        input[type="email"]:focus,
+        input[type="text"]:focus {
+            transform: scale(1.02);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 107, 129, 0.2);
+            outline: none;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            border-radius: 50%;
+            mix-blend-mode: screen;
         }
     </style>
 </head>
@@ -254,7 +382,6 @@
         <div class="loading-spinner"></div>
     </div>
 
-    <!-- Welcome Page -->
     <div id="welcome" class="container animate__animated animate__fadeIn">
         <div class="header">
             Campagne Secret Santa
@@ -271,7 +398,6 @@
         </div>
     </div>
 
-    <!-- Login Page -->
     <div id="login" class="container animate__animated animate__fadeIn" style="display:none;">
         <div class="header">
             Secret Santa - Connexion
@@ -293,7 +419,6 @@
         </div>
     </div>
 
-    <!-- Result Page -->
     <div id="result" class="container animate__animated animate__fadeIn" style="display:none;">
         <div class="header">
             Votre Mission Secret Santa
@@ -328,66 +453,331 @@
     </div>
 
     <div class="footer">
-        &copy; 2024 Secret Santa | Répandez la magie de Noël ! 🎁
+        &copy; 2024 Secret Santa | Répandez la magie de Noël ! 🎁 | Made by https://github.com/AnalyticAce
     </div>
 
     <script>
-
         let scene, camera, renderer, stars = [];
-
         const IpAddress = "https://santa-secret-amhdebawe6gyepan.canadacentral-01.azurewebsites.net";
 
         function initThreeJS() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer = new THREE.WebGLRenderer({ 
+                alpha: true,
+                antialias: true
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
             
             const container = document.getElementById('canvas-container');
             if (container) {
                 container.appendChild(renderer.domElement);
-                createStars();
+                createEnhancedStars();
                 camera.position.z = 5;
                 animate();
-            } else {
-                console.error('Canvas container not found');
             }
         }
 
-        function createStars() {
-            const starGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-            const starMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+        function createEnhancedStars() {
+            const starGeometry = new THREE.SphereGeometry(0.1, 12, 12);
+            const starMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    color: { value: new THREE.Color(0xFFFFFF) }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform vec3 color;
+                    varying vec2 vUv;
+                    
+                    void main() {
+                        float intensity = sin(time * 2.0) * 0.5 + 0.5;
+                        vec3 finalColor = color * intensity;
+                        gl_FragColor = vec4(finalColor, intensity);
+                    }
+                `,
+                transparent: true
+            });
 
             for(let i = 0; i < 200; i++) {
-                const star = new THREE.Mesh(starGeometry, starMaterial);
+                const star = new THREE.Mesh(starGeometry, starMaterial.clone());
                 star.position.set(
                     Math.random() * 100 - 50,
                     Math.random() * 100 - 50,
                     Math.random() * 100 - 50
                 );
+                star.userData = {
+                    rotationSpeed: Math.random() * 0.02,
+                    pulseOffset: Math.random() * Math.PI * 2
+                };
                 stars.push(star);
                 scene.add(star);
             }
         }
 
-        function animate() {
+        function animate(time) {
             requestAnimationFrame(animate);
-            stars.forEach(star => {
-                star.rotation.x += 0.01;
-                star.rotation.y += 0.01;
+            
+            stars.forEach((star, index) => {
+                star.rotation.x += star.userData.rotationSpeed;
+                star.rotation.y += star.userData.rotationSpeed;
+                
+                const material = star.material;
+                material.uniforms.time.value = time * 0.001 + star.userData.pulseOffset;
+                
+                star.position.y += Math.sin(time * 0.001 + index) * 0.01;
             });
+
             renderer.render(scene, camera);
+        }
+
+        function createParticleEffect(e) {
+            const colors = [
+                '#ff4757', // primary
+                '#ff6b81', // accent
+                '#2ecc71', // success
+                '#ffffff'  // snow
+            ];
+
+            for(let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 8 + 4;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                const startX = e.clientX;
+                const startY = e.clientY;
+                
+                document.body.appendChild(particle);
+
+                gsap.fromTo(particle, 
+                    {
+                        x: startX,
+                        y: startY,
+                        opacity: 1
+                    },
+                    {
+                        duration: 1 + Math.random() * 0.5,
+                        x: startX + (Math.random() - 0.5) * 200,
+                        y: startY + (Math.random() - 0.5) * 200,
+                        rotation: Math.random() * 360,
+                        opacity: 0,
+                        ease: "power2.out",
+                        onComplete: () => particle.remove()
+                    }
+                );
+            }
+        }
+
+        function addSparkleEffect(element) {
+            element.addEventListener('mousemove', (e) => {
+                const rect = element.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = `${x}px`;
+                sparkle.style.top = `${y}px`;
+                sparkle.style.width = `${Math.random() * 20 + 10}px`;
+                sparkle.style.height = sparkle.style.width;
+                
+                element.appendChild(sparkle);
+                
+                gsap.to(sparkle, {
+                    duration: 0.8,
+                    scale: 0,
+                    opacity: 0,
+                    ease: "power2.out",
+                    onComplete: () => sparkle.remove()
+                });
+            });
+        }
+
+        function animateText(element) {
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, i) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.style.opacity = '0';
+                span.style.transform = 'translateY(20px)';
+                element.appendChild(span);
+                
+                gsap.to(span, {
+                    duration: 0.5,
+                    opacity: 1,
+                    y: 0,
+                    delay: i * 0.03,
+                    ease: "back.out"
+                });
+            });
+        }
+
+        function createEnhancedSnow() {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+
+            const snowflakes = ['❄', '❅', '❆', '•', '∗', '⋆'];
+            const colors = ['#fff', '#eef', '#ffe'];
+            
+            snowflake.innerHTML = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+            snowflake.style.color = colors[Math.floor(Math.random() * colors.length)];
+            
+            const startPos = Math.random() * 100;
+            const duration = Math.random() * 5 + 3;
+            const delay = Math.random() * 2;
+            
+            snowflake.style.cssText = `
+                left: ${startPos}vw;
+                opacity: ${Math.random() * 0.7 + 0.3};
+                font-size: ${Math.random() * 20 + 10}px;
+                filter: blur(${Math.random()}px);
+                animation: snowfall ${duration}s linear ${delay}s infinite;
+            `;
+
+            document.body.appendChild(snowflake);
+        }
+
+        function createInteractiveBackground() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.zIndex = '-1';
+            document.body.appendChild(canvas);
+        
+            let particles = [];
+            const mouse = { x: 0, y: 0 };
+        
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * 2 - 1;
+                }
+        
+                update() {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        const force = (100 - distance) / 100;
+                        this.speedX -= dx * force * 0.02;
+                        this.speedY -= dy * force * 0.02;
+                    }
+        
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    
+                    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+                }
+        
+                draw() {
+                    ctx.fillStyle = '#ffffff22';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        
+            function init() {
+                particles = [];
+                for (let i = 0; i < 100; i++) {
+                    particles.push(new Particle());
+                }
+            }
+        
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+        
+            window.addEventListener('resize', resize);
+            window.addEventListener('mousemove', (e) => {
+                mouse.x = e.x;
+                mouse.y = e.y;
+            });
+        
+            resize();
+            init();
+            animate();
+        }
+
+        function setupCardInteraction() {
+            document.querySelectorAll('.info').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width - 0.5;
+                    const y = (e.clientY - rect.top) / rect.height - 0.5;
+                    
+                    gsap.to(card, {
+                        duration: 0.5,
+                        rotateY: x * 20,
+                        rotateX: -y * 20,
+                        scale: 1.05,
+                        ease: "power2.out",
+                        transformPerspective: 1000,
+                        transformOrigin: "center"
+                    });
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    gsap.to(card, {
+                        duration: 0.5,
+                        rotateY: 0,
+                        rotateX: 0,
+                        scale: 1,
+                        ease: "power2.out"
+                    });
+                });
+            });
         }
 
         const UI = {
             showLoading() {
-                const loader = document.querySelector('.loading');
-                if (loader) loader.style.display = 'flex';
+                gsap.to('.loading', {
+                    duration: 0.3,
+                    display: 'flex',
+                    opacity: 1,
+                    ease: "power2.inOut"
+                });
             },
 
             hideLoading() {
-                const loader = document.querySelector('.loading');
-                if (loader) loader.style.display = 'none';
+                gsap.to('.loading', {
+                    duration: 0.3,
+                    opacity: 0,
+                    display: 'none',
+                    ease: "power2.inOut"
+                });
             },
 
             showError(message) {
@@ -395,32 +785,56 @@
                 if (errorElement) {
                     errorElement.textContent = message;
                     errorElement.style.display = "block";
-                    errorElement.classList.add('animate__animated', 'animate__shakeX');
-                    setTimeout(() => {
-                        errorElement.classList.remove('animate__animated', 'animate__shakeX');
-                    }, 1000);
+                    gsap.from(errorElement, {
+                        duration: 0.5,
+                        y: -20,
+                        opacity: 0,
+                        ease: "back.out"
+                    });
                 }
             }
         };
 
         function navigateToLogin() {
             UI.showLoading();
-            setTimeout(() => {
-                const welcome = document.getElementById("welcome");
-                const login = document.getElementById("login");
-                if (welcome) welcome.style.display = "none";
-                if (login) login.style.display = "block";
-                UI.hideLoading();
-            }, 1000);
+            
+            gsap.to("#welcome", {
+                duration: 0.5,
+                opacity: 0,
+                y: -20,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    document.getElementById("welcome").style.display = "none";
+                    document.getElementById("login").style.display = "block";
+                    gsap.from("#login", {
+                        duration: 0.5,
+                        opacity: 0,
+                        y: 20,
+                        ease: "power2.out",
+                        onComplete: () => UI.hideLoading()
+                    });
+                }
+            });
         }
 
         function navigateToResult() {
-            console.log("Navigating to result page");
-            const login = document.getElementById("login");
-            const result = document.getElementById("result");
-            if (login) login.style.display = "none";
-            if (result) result.style.display = "block";
-            loadUserData();
+            gsap.to("#login", {
+                duration: 0.5,
+                opacity: 0,
+                y: -20,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    document.getElementById("login").style.display = "none";
+                    document.getElementById("result").style.display = "block";
+                    gsap.from("#result", {
+                        duration: 0.5,
+                        opacity: 0,
+                        y: 20,
+                        ease: "power2.out"
+                    });
+                    loadUserData();
+                }
+            });
         }
 
         function checkLocalStorage() {
@@ -436,6 +850,7 @@
 
         async function handleLogin(email, secret) {
             try {
+                UI.showLoading();
                 const response = await fetch(`${IpAddress}/login`, {
                     method: "POST",
                     headers: {
@@ -449,8 +864,6 @@
                 if (!response.ok) {
                     throw new Error(data.detail || 'Login failed');
                 }
-
-                console.log("Response data:", data);
                 
                 if (data && data.message && data.recipient) {
                     localStorage.setItem('userData', JSON.stringify(data));
@@ -469,11 +882,7 @@
         function loadUserData() {
             try {
                 const storedData = localStorage.getItem('userData');
-                console.log("Stored data:", storedData);
-                
-                if (!storedData) {
-                    throw new Error('No user data found');
-                }
+                if (!storedData) throw new Error('No user data found');
                 
                 const userData = JSON.parse(storedData);
                 if (!userData?.message || !userData?.recipient) {
@@ -481,8 +890,7 @@
                 }
 
                 const username = userData.message.split('Bonjour ')[1].split(',')[0];
-                const userNameElement = document.getElementById("userName");
-                if (userNameElement) userNameElement.textContent = username;
+                document.getElementById("userName").textContent = username;
 
                 const elements = [
                     { id: 'recipientName', value: userData.recipient.Nom },
@@ -496,11 +904,18 @@
                     setTimeout(() => {
                         const el = document.getElementById(element.id);
                         if (el) {
-                            el.style.opacity = '0';
-                            el.textContent = element.value || 'Non spécifié';
-                            fadeIn(el, 500);
-                        } else {
-                            console.error(`Element with id ${element.id} not found`);
+                            gsap.fromTo(el,
+                                { opacity: 0, x: -20 },
+                                {
+                                    duration: 0.5,
+                                    opacity: 1,
+                                    x: 0,
+                                    ease: "power2.out",
+                                    onStart: () => {
+                                        el.textContent = element.value || 'Non spécifié';
+                                    }
+                                }
+                            );
                         }
                     }, index * 300);
                 });
@@ -510,47 +925,35 @@
             }
         }
 
-        function fadeIn(element, duration) {
-            let opacity = 0;
-            const interval = 50;
-            const gap = interval / duration;
-
-            function tick() {
-                opacity = Math.min(opacity + gap, 1);
-                element.style.opacity = opacity;
-                if (opacity < 1) {
-                    requestAnimationFrame(tick);
-                }
-            }
-            tick();
-        }
-
-        // Event Listeners
         window.addEventListener('load', () => {
             if (!checkLocalStorage()) {
                 alert('Local storage is not available. Please enable cookies and reload the page.');
             }
             initThreeJS();
-            createSnowflakes();
+            setInterval(createEnhancedSnow, 200);
+            
+            const giftBox = document.createElement('div');
+            giftBox.className = 'gift-box';
+            document.body.appendChild(giftBox);
+            
+            giftBox.addEventListener('click', createParticleEffect);
         });
 
         window.addEventListener('resize', () => {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
             if (camera && renderer) {
-                camera.aspect = width / height;
+                camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
-                renderer.setSize(width, height);
+                renderer.setSize(window.innerWidth, window.innerHeight);
             }
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+            setupCardInteraction();
+            
             const loginForm = document.getElementById("loginForm");
             if (loginForm) {
                 loginForm.addEventListener("submit", (event) => {
                     event.preventDefault();
-                    UI.showLoading();
-                    
                     const email = document.getElementById("email")?.value;
                     const secret = document.getElementById("secret")?.value;
                     
@@ -558,67 +961,10 @@
                         handleLogin(email, secret);
                     } else {
                         UI.showError("Please fill in all fields");
-                        UI.hideLoading();
                     }
                 });
             }
-
-            document.addEventListener('mousemove', (e) => {
-                const cards = document.querySelectorAll('.info');
-                const mouseX = e.clientX / window.innerWidth - 0.5;
-                const mouseY = e.clientY / window.innerHeight - 0.5;
-
-                cards.forEach(card => {
-                    const rect = card.getBoundingClientRect();
-                    const cardX = rect.left + rect.width / 2;
-                    const cardY = rect.top + rect.height / 2;
-
-                    const angle = Math.atan2(e.clientY - cardY, e.clientX - cardX);
-                    const distance = Math.min(
-                        Math.hypot(e.clientX - cardX, e.clientY - cardY) / 1000,
-                        0.5
-                    );
-
-                    card.style.transform = `
-                        perspective(1000px)
-                        rotateY(${mouseX * 10}deg)
-                        rotateX(${-mouseY * 10}deg)
-                        translateZ(${distance * 50}px)
-                    `;
-                });
-            });
         });
-
-        function createSnowflakes() {
-            const snowflakesCount = 50;
-            const container = document.body;
-            
-            for (let i = 0; i < snowflakesCount; i++) {
-                createSnowflake(container);
-            }
-        }
-
-        function createSnowflake(container) {
-            const snowflake = document.createElement('div');
-            snowflake.innerHTML = '❄';
-            snowflake.className = 'snowflake';
-            snowflake.style.cssText = `
-                position: fixed;
-                color: white;
-                opacity: ${Math.random()};
-                font-size: ${Math.random() * 20 + 10}px;
-                left: ${Math.random() * 100}vw;
-                animation: fall ${Math.random() * 5 + 3}s linear infinite;
-                z-index: 1;
-            `;
-
-            container.appendChild(snowflake);
-
-            setTimeout(() => {
-                snowflake.remove();
-                createSnowflake(container);
-            }, (Math.random() * 5 + 3) * 1000);
-        }
     </script>
 </body>
 </html>
